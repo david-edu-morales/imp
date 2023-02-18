@@ -37,6 +37,7 @@ axs[0].set_ylabel('PP (mm)', fontweight='bold')
 axs[0].grid(True)
 axs[0].set_title('Leaf River Daily Climatic Data (WY 1948)', fontweight='bold')
 axs[0].legend(loc='lower right')
+axs[0].tick_params(axis='both', direction='in')
 
 y = lr_yearone['pET']
 
@@ -47,6 +48,7 @@ axs[1].set_xlim(0, 365)
 axs[1].set_ylabel('ET (mm)', fontweight='bold')
 axs[1].grid(True)
 axs[1].legend(loc='upper right')
+axs[1].tick_params(axis='both', direction='in')
 
 y = lr_yearone['Q']
 
@@ -56,6 +58,7 @@ axs[2].set_xlim(0, 365)
 axs[2].set_ylabel('Q (cms)', fontweight='bold')
 axs[2].fill_between(x, y, 0, alpha=0.4, label='Q as area plot', edgecolor='k')
 axs[2].legend(loc='upper right')
+axs[2].tick_params(axis='both', direction='in')
 
 #axs[3].plot(x, y, '-ok', mec='r', mfc='r', markersize='2.5')
 axs[3].semilogy(x,y, 'k', label='Q as line plot')
@@ -64,6 +67,7 @@ axs[3].set_xlim(0, 365)
 axs[3].set_ylabel('Q (cms)', fontweight='bold')
 axs[3].set_xlabel('Time (days)]', fontweight='bold')
 axs[3].legend(loc='upper left')
+axs[3].tick_params(axis='both', direction='in')
 
 plt.show()
 
