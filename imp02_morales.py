@@ -137,6 +137,127 @@ for i in KparsIndex:
               
      ax.plot(time, QQsim, '-', label=lbl, color=color)
 plt.legend()
+plt.savefig('imp02-p2_linRes_morales')
 
-# %
+# %%
+# Create a function to describe the Nash-Cascade model
+
+def nashCasc(PP, NRes, XXin, Kpar):
+    Res = np.arange(0, NRes, 1)
+    UU = PP
+    PE = 0.0
+    XXout = np.zeros(NRes)
+    QQind = np.zeros(NRes)
+
+    for i in Res:
+      [QQind[i], ET, XXout[i]] = linRes(XXin[i], UU, PE, Kpar[i])
+      UU = QQind[i]
+
+    QQout = UU
+    return [QQout, XXout]
+
+# %%
+
+Kpar = 0.01; Nres = 3
+
+PX = np.zeros(365)
+XXin = np.zeros(Nres)
+QQsim = np.zeros(365)
+for t in time:
+    PX[t] = PPobs[t] - np.minimum(PPobs[t], PEobs[t])
+    [QQsim[t], XXout] = nashCasc(PX[t], Nres, XXin, Kpar)
+    XXin = XXout
+
+fig, ax = plt.subplots()
+
+ax.plot(time,QQsim)
+# %%
+# Represent system as a series of reservoirs using a Nash-Cascade model
+fig, ax = plt.subplots(figsize=(20,5))
+fig.set_facecolor('whitesmoke')
+
+ax.plot(time, QQobs, 'or', markersize=3, label='Observed QQ')
+ax.set_xlim(periodStart, periodEnd)
+ax.grid(True)
+
+nbins = 3; bin = 0; Kpar = 0.1
+XX = np.zeros(365+1); QQsim = np.zeros(365); ETsim = np.zeros(365)
+
+while bin <= nbins:
+    for t in time:
+       [QQsim[t], ETsim[t], XX[t+1]] = linRes(XX[t], PPobs[t], PEobs[t], Kpar)
+
+    XX[0] = XX[-1]
+    print(XX[-1])
+    bin += 1
+ax.plot(time, QQsim, '-', label='trial')
+plt.legend()
+
+# %%
+# def LinRes(XXin, PP, PE, Kpar):                 # Define LinRes function subprogram       
+#     QQ = Kpar*XXin;                             # Compute QQ
+#     ET = min(PP,PE);                            # Compute ET
+#     XXout = XXin - QQ - ET + PP;                 # Update state variable
+#     return [QQ, ET, XXout]                       # Return compute quantities
+
+def NashCasc(PP, NRes, XXin, Kpar):           # Define NashCasc function subprogram
+    Res   = np.arange(0,NRes,1);              # Set Loop vector on tanks (integer values) 
+    UU    = PP;                               # UU is set to be input to first tank
+    PE    = 0.0;                              # PE is set to be zero
+    XXout = np.zeros(NRes);                   # Initialize array to recieve XXout
+    QQind = np.zeros(NRes);                   # Initialize array to recieve QQint (individual tank outflows)
+
+    for i in Res: # Begin loop on tanks in series
+        [QQind[i], ET, XXout[i]] = linRes(XXin[i],UU,PE,Kpar[i]); # Call LinRes subprogram
+        UU = QQind[i];                        # Set UU (inflow to next tank) to be 
+                                              # outflow from previous tank
+    # End loop on tanks in series    
+    QQout = UU;                               # Get output from last tank
+    return [QQout, XXout];                    # Return computed quantities
+
+# %%
+
+
+colors = ['orangered','gold','chartreuse','turquoise','royalblue','fuchsia']
+
+Kpars = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6]
+nKpars = len(Kpars)
+KparsIndex = np.arange(0, nKpars, 1)
+
+nashRes = [1, 2, 3, 4, 5]
+nashResLength = len(nashRes)
+nResIndex = np.arange(0, nashResLength, 1)
+
+fig, ax = plt.subplots(nashResLength, 1, figsize=(15,20), sharex=True)
+fig.set_facecolor('whitesmoke')
+# fig.suptitle('Nash-Cascade predicted streamflow (QQ) vs. observations\nWater Year 1948', fontweight='bold')
+
+for k in nResIndex:
+
+   for i in KparsIndex:
+      
+      PX = np.zeros(365);                                  # Initialize PX
+      NRes = nashRes[k]                           # Get NRes value (as integer)
+      Kpar = np.ones(NRes)*Kpars[i]                     # Set all tanks to same Kpar value
+      XXin = np.zeros(NRes);                               # Initialize XXin
+      QQsim = np.zeros(365);                               # Initialize QQsim array
+      for t in time: # Run loop on Time
+         PX[t] = PPobs[t] - np.minimum(PPobs[t],PEobs[t]);      # Compute PX for time step
+         [QQsim[t], XXout] = NashCasc(PX[t], NRes, XXin, Kpar); # Run Nash Cascade for one time step
+         XXin = XXout; 
+
+
+      ax[k].plot(time, QQsim, color=colors[i], label='Predicted QQ; Kpar={}'.format(str(Kpar[0])))
+      ax[k].text(0.06, 0.9, 'n reservoir={}'.format(str(k+1)), horizontalalignment='center', verticalalignment='center', transform=ax[k].transAxes, bbox=dict(facecolor='white', edgecolor='k', pad=3.0))
+
+   ax[k].plot(time, QQobs, 'or', markersize=2.5, label='Observed QQ')
+   ax[k].set_ylabel('QQ (cms)', fontweight='bold')
+   # ax[k].set_title('n={}'.format(NRes), fontweight='bold')
+   ax[k].grid(True)
+   ax[k].set_xlim(periodStart, periodEnd)
+   
+   plt.legend()
+ax[k].set_xlabel('Time (days)', fontweight='bold')
+ax[0].set_title('Nash-Cascade predicted streamflow (QQ) vs. observations\nWater Year 1948', fontweight='bold')
+plt.tight_layout
 # %%
