@@ -105,11 +105,10 @@ def CatchModel(Inputs, InStates, Pars, NRes):
 
     return [Outputs, OutStates, IntFluxes]
 
-def MainCatchModel(PPobs, PEobs, Pars, NRes):
+def MainCatchModel(Pars, PPobs, PEobs, QQobs, NRes):
 # def MainCatchModel(PPobs, PEobs, Theta_C1,
 #                    Theta_P1, Theta_K12, Theta_K13,
 #                    Theta_K2Q, Theta_K3Q, NRes):
-    
     
     NTime = len(PPobs)              # Get length of time vector
     Time  = np.arange(0, NTime, 1)  # Set up time vector (of integer values)
@@ -188,3 +187,4 @@ def KGE_Fn(Qs,Qo):                  # Define KGE_Fn function subprogram
     KGE   = 1 - np.sqrt((1-alpha)**2 + (1-beta)**2 + (1-rho)**2)# compute KGE
     KGEss = (KGE - (1-np.sqrt(2)))/np.sqrt(2)                   # compute KGEss
     return [KGEss, KGE, alpha, beta, rho]   # Return compute quantities
+# %%
