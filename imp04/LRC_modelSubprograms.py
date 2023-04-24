@@ -105,18 +105,21 @@ def CatchModel(Inputs, InStates, Pars, NRes):
 
     return [Outputs, OutStates, IntFluxes]
 
-def MainCatchModel(PPobs, PEobs, Theta_C1,
-                   Theta_P1, Theta_K12, Theta_K13,
-                   Theta_K2Q, Theta_K3Q, NRes):
+def MainCatchModel(PPobs, PEobs, Pars, NRes):
+# def MainCatchModel(PPobs, PEobs, Theta_C1,
+#                    Theta_P1, Theta_K12, Theta_K13,
+#                    Theta_K2Q, Theta_K3Q, NRes):
     
     
     NTime = len(PPobs)              # Get length of time vector
     Time  = np.arange(0, NTime, 1)  # Set up time vector (of integer values)
 
     # Pack parameter values in Par array
-    Npar = 6; Pars = np.zeros(Npar)
-    Pars[0] = Theta_C1;  Pars[1] = Theta_P1;  Pars[2] = Theta_K12
-    Pars[3] = Theta_K13; Pars[4] = Theta_K2Q; Pars[5] = Theta_K3Q
+    # Npar = 6; Pars = np.zeros(Npar)
+    # Pars[0] = Theta_C1;  Pars[1] = Theta_P1;  Pars[2] = Theta_K12
+    # Pars[3] = Theta_K13; Pars[4] = Theta_K2Q; Pars[5] = Theta_K3Q
+
+    Theta_K2Q = Pars[4]
 
     # Initialize model state arrays
     InStates = np.zeros(NRes+2); OutStates = InStates.copy()
@@ -145,4 +148,43 @@ def MainCatchModel(PPobs, PEobs, Theta_C1,
         InStates = OutStates
     # use the below commented line when evaluating model state variables
     # return [QQsim, AEsim, XX1, XX2, XX3]
-    return [QQsim, AEsim]
+
+    SpinUp = 90                                         # SpinUp period to stabilize variations
+
+    Qs   = QQsim[SpinUp:NTime].copy()                   # remove spin-up period
+    Qo   = QQobs[SpinUp:NTime].copy()                   # remove spin-up period
+    MSE  = MSE_Fn(Qs, Qo)                               # Compute MSE
+    NSE  = NSE_Fn(Qs, Qo)                               # Compute NSE
+    NSEL = NSE_Fn(np.log(Qs), np.log(Qo))               # Compute NSEL
+    [KGEss, KGE, alpha, beta, rho] = KGE_Fn(Qs, Qo)     # Compute KGE & components
+
+    # Create lables for printing
+    MSELab = f'MSE = {MSE:.2f}'; NSELab = f'NSE = {NSE:.2f}'
+    KGEssLab = f'KGEss = {KGEss:.2f}'; RhoLab = f'Rho = {rho:.2f}'
+    AlphaLab = f'Alpha = {alpha:.2f}'; BetaLab = f'Beta = {beta:.2f}'
+    NSELLab = f'NSEL = {NSEL:.2f}'
+
+    return 1/KGEss
+
+#==== Compute Mean Square Error (MSE) ========================================
+
+def MSE_Fn(Qs,Qo):                  # Define MSE_Fn function subprograms
+    MSE = np.mean((Qs-Qo)**2)       # Compute MSE
+    return MSE
+
+#==== Compute NSE Metric
+
+def NSE_Fn(Qs, Qo):                 # Define NSE_Fn function subprograms
+    MSE = MSE_Fn(Qs,Qo)             # Compute MSE
+    NSE = 1 - (MSE/np.var(Qo))      # Compute NSE
+    return NSE
+
+#==== Compute KGE Metric =====================================================
+
+def KGE_Fn(Qs,Qo):                  # Define KGE_Fn function subprogram
+    alpha = np.std(Qs)/np.std(Qo)                               # compute alpha
+    beta  = np.mean(Qs)/np.mean(Qo)                             # compute beta
+    rho   = np.corrcoef(Qs,Qo)[0,1]                             # compute rho
+    KGE   = 1 - np.sqrt((1-alpha)**2 + (1-beta)**2 + (1-rho)**2)# compute KGE
+    KGEss = (KGE - (1-np.sqrt(2)))/np.sqrt(2)                   # compute KGEss
+    return [KGEss, KGE, alpha, beta, rho]   # Return compute quantities
