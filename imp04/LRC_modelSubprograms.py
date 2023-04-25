@@ -187,4 +187,29 @@ def KGE_Fn(Qs,Qo):                  # Define KGE_Fn function subprogram
     KGE   = 1 - np.sqrt((1-alpha)**2 + (1-beta)**2 + (1-rho)**2)# compute KGE
     KGEss = (KGE - (1-np.sqrt(2)))/np.sqrt(2)                   # compute KGEss
     return [KGEss, KGE, alpha, beta, rho]   # Return compute quantities
+
+#==== Compute all of the performance metrics (calls metric functions) ========
+
+def PerfMetrics(QQsim, QQobs, SpinUp, iPrint):
+
+    Qs   = QQsim[SpinUp:NTime].copy()                   # remove spin-up period
+    Qo   = QQobs[SpinUp:NTime].copy()                   # remove spin-up period
+    MSE  = MSE_Fn(Qs, Qo)                               # Compute MSE
+    NSE  = NSE_Fn(Qs, Qo)                               # Compute NSE
+    NSEL = NSE_Fn(np.log(Qs), np.log(Qo))               # Compute NSEL
+    [KGEss, KGE, alpha, beta, rho] = KGE_Fn(Qs, Qo)     # Compute KGE & components
+
+    # Create lables for printing
+    MSELab = f'MSE = {MSE:.2f}'; NSELab = f'NSE = {NSE:.2f}'
+    KGEssLab = f'KGEss = {KGEss:.2f}'; RhoLab = f'Rho = {rho:.2f}'
+    AlphaLab = f'Alpha = {alpha:.2f}'; BetaLab = f'Beta = {beta:.2f}'
+    NSELLab = f'NSEL = {NSEL:.2f}'
+
+    if iPrint == 1: # print following lines only if the iPrint Flag is set to 1
+        print()
+        print('================================================================')
+        print(MSELab, NSELab, KGEssLab, AlphaLab, BetaLab, RhoLab, NSELLab)
+        print('================================================================')
+
+    return [MSE,NSE,NSEL,KGEss,KGE,alpha,beta,rho]
 # %%
