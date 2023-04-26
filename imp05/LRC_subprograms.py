@@ -157,13 +157,7 @@ def MainCatchModel(Pars, PPobs, PEobs, QQobs, NRes):
     NSEL = NSE_Fn(np.log(Qs), np.log(Qo))               # Compute NSEL
     [KGEss, KGE, alpha, beta, rho] = KGE_Fn(Qs, Qo)     # Compute KGE & components
 
-    # Create lables for printing
-    MSELab = f'MSE = {MSE:.2f}'; NSELab = f'NSE = {NSE:.2f}'
-    KGEssLab = f'KGEss = {KGEss:.2f}'; RhoLab = f'Rho = {rho:.2f}'
-    AlphaLab = f'Alpha = {alpha:.2f}'; BetaLab = f'Beta = {beta:.2f}'
-    NSELLab = f'NSEL = {NSEL:.2f}'
-
-    return 1/KGEss
+    return [QQsim, AEsim, MSE,NSE,NSEL,KGEss,KGE,alpha,beta,rho]
 
 #====
 
