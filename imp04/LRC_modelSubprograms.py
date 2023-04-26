@@ -191,7 +191,7 @@ def KGE_Fn(Qs,Qo):                  # Define KGE_Fn function subprogram
 #==== Compute all of the performance metrics (calls metric functions) ========
 
 def PerfMetrics(QQsim, QQobs, SpinUp, iPrint):
-
+    NTime = len(QQobs)
     Qs   = QQsim[SpinUp:NTime].copy()                   # remove spin-up period
     Qo   = QQobs[SpinUp:NTime].copy()                   # remove spin-up period
     MSE  = MSE_Fn(Qs, Qo)                               # Compute MSE
